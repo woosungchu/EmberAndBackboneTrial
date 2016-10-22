@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block content %}
+<script src="//swjs.s3.amazonaws.com/libs/handlebars-1.0.0.rc.2.js"></script>
+<script src="//swjs.s3.amazonaws.com/libs/ember.js"></script>
+<script src="//swjs.s3.amazonaws.com/libs/ember-data.js"></script>
+
+<script>
+var App = Ember.Application.create();
+
+App.Router.map(function(){
+	//different between resource() and route() - https://guides.emberjs.com/v1.10.0/routing/defining-your-routes/
+	this.route('messages');
+	this.route('users');
+});
+
+App.IndexRoute = Ember.Route.extend({
+	//redirect API  - http://emberjs.com/api/classes/Ember.Route.html#method_redirect
+	redirect : function(){
+		this.transitionTo('users')
+	}
+})
+
+App.MessagesRoute = Ember.Route.extend({
+	//About model - http://emberjs.com/api/classes/Ember.Route.html#method_model
+	model : function(){
+		return App.Message.find();
+	}
+})
+
+App.UsersRoute = Ember.Route.extend({
+	model : function(){
+		return App.User.find();
+	}
+})
+
+App.Store = DS.Store.extend({
+	//dunno what exactly revision means but I think it is the version of Ember.DS (I am not sure...)
+	revision : 11
+})
+
+App.Message = DS.Model.extend({
+	user : DS.belongsTo('App.User'),
+	text : DS.attr('string')
+})
+
+App.User = DS.Model.extend({
+	messages : DS.hasMany('App.Message'),
+	screen_name : DS.attr('string')
+})
+
+
+</script>
+
+
+{% raw %}
+<!-- handlebar -->
+  <script type="text/x-handlebars" data-template-name="application">
+    <div id="nav">
+        <span>{{#linkTo "users"}}users{{/linkTo}}</span>
+        <span>{{#linkTo "messages"}}messages{{/linkTo}}</span>
+    </div>
+    {{ outlet }}
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="messages">
+    <h2>Messages</h2>
+    <p>Messages loads Messages from <tt>/messages</tt> and loads related Users from <tt>/users</tt>.</p>
+    <ul>
+        {{#each message in controller}}
+        {{ log message }}
+        <li>@{{ message.user.screen_name }}: {{ message.text }}</li>
+        {{/each}}
+    </ul>
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="users">
+    <h2>Users</h2>
+    <p>Users loads Users from <tt>/users</tt> and loads related Messages from <tt>/messages</tt>.</p>
+    <ul>
+        {{#each user in controller}}
+        {{ log user }}
+        <li>
+            {{ user.screen_name }}
+            <ul>
+            {{#each message in user.messages}}
+                <li>{{ message.text }}</li>
+            {{/each}}
+            </ul>
+        </li>
+        {{/each}}
+    </ul>
+  </script>
+<!-- endhandlebar -->  
+{% endraw %}
+
+
+<script>
+// 	console.info("routes", App.Router.router.recogizer.names);
+</script>
+
+
+{% endblock %}

@@ -31,7 +31,9 @@ var TodoList = Backbone.Collection.extend({
 		if(!this.length) return 1;
 		return this.last().get('order') +1;
 	},
-	comparator: 'order'
+	comparator: function(item){
+		return -item.get('order')
+	}
 });
 
 var Todos = new TodoList;
@@ -98,7 +100,8 @@ var AppView = Backbone.View.extend({
 		this.footer = this.$('footer');
 		this.main = $('#main');
 		
-		Todos.fetch();
+//		Todos.fetch();
+		Todos.fetch({reset: true, sort: true});
 	},
 	render: function(){
 		var done = Todos.done().length;
